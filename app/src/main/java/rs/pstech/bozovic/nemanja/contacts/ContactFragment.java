@@ -12,25 +12,26 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 
-public class ContactActivityFragment extends Fragment {
+public class ContactFragment extends Fragment {
 
     static final String ARG_CONTACT_ID = "contact_id";
     static final String ARG_CONTACT_POSITION = "position";
 
-
+    private static final String EXTRA_CONTACT_ID = "contact id";
+//    private static final String EXTRA_CONTACT_POS = "pos id";
 
     String mContactId = null;
 
     FullContact mContact;
 
-    private final Uri PLACEHOLDER_IMAGE = Uri.parse("android.resource://rs.pstech.bozovic.nemanja.contacts/drawable/placeholder_contact_photo");
+//    private final Uri PLACEHOLDER_IMAGE = Uri.parse("android.resource://rs.pstech.bozovic.nemanja.contacts/drawable/placeholder_contact_photo");
 
-    TextView nameTextView;
-    TextView phoneNumbersTextView;
-    TextView emailsTextView;
-    ImageView photoImageView;
+    private TextView nameTextView;
+    private TextView phoneNumbersTextView;
+    private TextView emailsTextView;
+    private ImageView photoImageView;
 
-    public ContactActivityFragment() {
+    public ContactFragment() {
         // Required empty public constructor
     }
 
@@ -38,22 +39,30 @@ public class ContactActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        Log.d(getClass().getSimpleName(), "onCreateView");
+
         //restore previous contact selection
         if (savedInstanceState != null) {
-            mContactId = savedInstanceState.getString(ARG_CONTACT_ID);
+            mContactId = savedInstanceState.getString(EXTRA_CONTACT_ID);
         }
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_contact, container, false);
+        View view = inflater.inflate(R.layout.fragment_contact, container, false);
+
+        nameTextView = (TextView) view.findViewById(R.id.name);
+        phoneNumbersTextView = (TextView) view.findViewById(R.id.phoneNumber);
+        emailsTextView = (TextView) view.findViewById(R.id.emails);
+        photoImageView = (ImageView) view.findViewById(R.id.contactPhoto);
+
+        return view;
     }
 
     @Override
     public void onStart() {
+        Log.d(getClass().getSimpleName(), "onStart");
         super.onStart();
 
-        nameTextView = (TextView) getActivity().findViewById(R.id.name);
-        phoneNumbersTextView = (TextView) getActivity().findViewById(R.id.phoneNumber);
-        emailsTextView = (TextView) getActivity().findViewById(R.id.emails);
-        photoImageView = (ImageView) getActivity().findViewById(R.id.contactPhoto);
+
+
         // During startup, check if there are arguments passed to the fragment.
         // onStart is a good place to do this because the layout has already been
         // applied to the fragment at this point so we can safely call the method
@@ -64,8 +73,9 @@ public class ContactActivityFragment extends Fragment {
             return;
         }
 
-        Bundle args = intent.getExtras();
+        Bundle args = getArguments();
         if (args != null) {
+            Log.d(getClass().getSimpleName(), "onCreate; getArguments() != null");
             mContactId = args.getString(ARG_CONTACT_ID);
             mContact = FullContact.getFullContactFromId(getActivity(), mContactId);
 
@@ -76,6 +86,8 @@ public class ContactActivityFragment extends Fragment {
     }
 
     public void updateContactView(String contact_id) {
+        Log.d(getClass().getSimpleName(), "updateContactView");
+
         if (mContact == null || !contact_id.equals(mContactId)) {
             mContact = FullContact.getFullContactFromId(getActivity(), contact_id);
         }
@@ -92,15 +104,17 @@ public class ContactActivityFragment extends Fragment {
             photoImageView.setImageURI(photo);
         }
         else
-            photoImageView.setImageURI(PLACEHOLDER_IMAGE);
+            photoImageView.setImageResource(R.drawable.placeholder_contact_photo);
 
 
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        Log.d(getClass().getSimpleName(), "onSaveInstanceState");
+
         super.onSaveInstanceState(outState);
-        outState.putString(ARG_CONTACT_ID, mContactId);
+        outState.putString(EXTRA_CONTACT_ID, mContactId);
     }
 
 }

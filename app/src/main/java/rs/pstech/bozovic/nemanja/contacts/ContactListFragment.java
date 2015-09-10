@@ -12,43 +12,36 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContactListActivityFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ContactListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-//    @Override
-//    public void onActivityCreated(Bundle savedInstanceState) {
-//        Log.d(CLASS_NAME, "onActivityCreated");
-//        super.onActivityCreated(savedInstanceState);
-//
-//
+
     public interface OnContactSelectedListener {
 
-        public void onContactSelected(int position, String contact_id);
+        void onContactSelected(int position, String contact_id);
     }
 
-    private static final String CLASS_NAME = ContactListActivityFragment.class.getSimpleName();
+    private static final String CLASS_NAME = ContactListFragment.class.getSimpleName();
 
     private static final int CONTACT_LOADER = 0;
 
     private ContactListActivity mListener; //Activity, callback, for communication with other fragment
     private SimpleContactsArrayAdapter mAdapter; //Adapter for my list
 
-
     private List<SimpleContact> mContactList = new ArrayList<>(); //contact list
 
 
-
-    public ContactListActivityFragment() {
+    public ContactListFragment() {
         // Required empty public constructor
     }
 
@@ -57,6 +50,7 @@ public class ContactListActivityFragment extends ListFragment implements LoaderM
         super.onAttach(activity);
         Log.d(CLASS_NAME, "onAttach");
         try {
+            //we need this reference so we can communicate with other fragments
             mListener = (ContactListActivity) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
@@ -65,9 +59,19 @@ public class ContactListActivityFragment extends ListFragment implements LoaderM
     }
 
     @Override
+    public void onDetach() {
+        Log.d(CLASS_NAME, "onDetach");
+        super.onDetach();
+        mListener = null;
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.d(CLASS_NAME, "onCreate");
         super.onCreate(savedInstanceState);
+
+        //because of this, this fragment will be called only once, while Activity is alive
+//        setRetainInstance(true);
 
         mAdapter = new SimpleContactsArrayAdapter(mListener, android.R.layout.simple_list_item_activated_1, mContactList);
         setListAdapter(mAdapter);
@@ -75,22 +79,19 @@ public class ContactListActivityFragment extends ListFragment implements LoaderM
         getLoaderManager().initLoader(CONTACT_LOADER, null, this);
     }
 
-//    }
-
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_contact_list, container, false);
+    }
 
     @Override
     public void onStart() {
         Log.d(CLASS_NAME, "onStart");
         super.onStart();
 
-        if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        }
-        else
-            getListView().setChoiceMode(ListView.CHOICE_MODE_NONE);
-
-
+        orientationChanged();
     }
+
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
@@ -105,13 +106,6 @@ public class ContactListActivityFragment extends ListFragment implements LoaderM
         getListView().setItemChecked(position, true);
     }
 
-
-    @Override
-    public void onDetach() {
-        Log.d(CLASS_NAME, "onDetach");
-        super.onDetach();
-        mListener = null;
-    }
 
 
     private List<SimpleContact> getContacts(){
@@ -207,5 +201,16 @@ public class ContactListActivityFragment extends ListFragment implements LoaderM
             super(context, resource, contacts);
             Log.d(CLASS_NAME, "SimpleContactsArrayAdapter Constructor");
         }
+    }
+
+    public void orientationChanged(){
+        if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        }
+        else
+            getListView().setChoiceMode(ListView.CHOICE_MODE_NONE);
+    }
+    public void selectItem(int position){
+        getListView().setItemChecked(position, true);
     }
 }

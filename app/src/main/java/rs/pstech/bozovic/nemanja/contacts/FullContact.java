@@ -16,13 +16,23 @@ import java.util.List;
  * Created by nemanja on 7.9.15..
  */
 public class FullContact {
-    String mId;
+
+    String mId; //this is unique id of contact (from database)
+
     String mName;
     Uri mPhotoUri;
-    List<String> mPhoneNumbers;
-    List<String> mEmails;
+    List<String> mPhoneNumbers; //contact may have multiple phone numbers
+    List<String> mEmails;       //contact may have multiple email addresses
 
-    public FullContact(String id, String name, Uri photoUri, List<String> phoneNumbers, List<String> emails) {
+    /**
+     *
+     * @param id unique id of contact (from database)
+     * @param name name of contact
+     * @param photoUri Uri of photo of contact
+     * @param phoneNumbers List of phone numbers
+     * @param emails List of email addresses
+     */
+    private FullContact(String id, String name, Uri photoUri, List<String> phoneNumbers, List<String> emails) {
         mId = id;
         mPhotoUri = photoUri;
         mName = name;
@@ -30,6 +40,10 @@ public class FullContact {
         mEmails = emails;
     }
 
+
+    /**
+     * Default constructor, use just for testing
+     */
     public FullContact() {
         mId = "None";
         mName = "None";
@@ -61,6 +75,10 @@ public class FullContact {
         return mEmails;
     }
 
+    /**
+     * Used for debugging and using in some generic adapter
+     * @return String representation of this contact
+     */
     @Override
     public String toString() {
         return "FullContact{" +
@@ -71,6 +89,12 @@ public class FullContact {
                 '}';
     }
 
+    /**
+     *
+     * @param context This is needed for permission to query datebase
+     * @param contactId Id of contact (from database)
+     * @return FullContact with this ID
+     */
     public static FullContact getFullContactFromId(Context context, String contactId) {
 
         ContentResolver contentResolver = context.getContentResolver();
@@ -182,15 +206,6 @@ public class FullContact {
 
         Cursor cursorPhoto = null;
         Uri photoUri = null;
-//
-//        {
-//            cursorPhoto = contentResolver.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
-//            System.out.println("Pocetak");
-//            for(int i=0; i < cursorPhoto.getColumnCount(); ++i){
-//                System.out.println(cursorPhoto.getColumnName(i));
-//            }
-//            System.out.println("KRAJ");
-//        }
 
         String[] projection = new String[]{ContactsContract.Contacts.PHOTO_URI};
         String where = ContactsContract.Contacts._ID + "= ?";
