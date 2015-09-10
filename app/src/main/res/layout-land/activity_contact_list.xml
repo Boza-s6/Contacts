@@ -5,13 +5,15 @@
     android:layout_height="match_parent"
     >
 
-    <FrameLayout
+    <fragment
+        android:name="rs.pstech.bozovic.nemanja.contacts.ContactListFragment"
         android:id="@+id/fragment_list_container_landscape"
         android:layout_weight="1"
         android:layout_width="0dp"
         android:layout_height="match_parent" />
 
-    <FrameLayout
+    <fragment
+        android:name="rs.pstech.bozovic.nemanja.contacts.ContactFragment"
         android:id="@+id/fragment_contact_container_landscape"
         android:layout_weight="2"
         android:layout_width="0dp"

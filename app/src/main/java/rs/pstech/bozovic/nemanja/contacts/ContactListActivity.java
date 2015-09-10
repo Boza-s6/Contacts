@@ -10,10 +10,8 @@ import android.util.Log;
 
 public class ContactListActivity extends Activity implements ContactListFragment.OnContactSelectedListener {
 
-    private enum FragmentTypeShowing {
-        CONTACT_LIST_FRAGMENT,
-        CONTACT_FRAGMENT,
-        BOTH
+    private enum FragmentTypeShowing{
+        LIST, CONTACT, BOTH
     }
 
     public static final String CLASS_NAME = ContactListActivity.class.getSimpleName();
@@ -34,7 +32,8 @@ public class ContactListActivity extends Activity implements ContactListFragment
     private ContactListFragment mContactListFragment; //instance of ListFragment
     private ContactFragment mContactFragment;         //instance of ContactFragment
 
-    private FragmentTypeShowing mCurrentFragmentTypeShowing; //used to track currently showing fragment
+    private boolean mLandscape;
+    private FragmentTypeShowing mCurrentFragmentTypeShowing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,39 +42,30 @@ public class ContactListActivity extends Activity implements ContactListFragment
         setContentView(R.layout.activity_contact_list);
 
         FragmentManager fm = getFragmentManager();
-
-        mContactListFragment = new ContactListFragment();
-        mContactFragment = new ContactFragment();
-
         FragmentTransaction transaction = fm.beginTransaction();
 
         switch (getOrientation()) {
             case Configuration.ORIENTATION_PORTRAIT:
+                mCurrentFragmentTypeShowing = FragmentTypeShowing.LIST;
 
+                mLandscape = false;
+
+                mContactListFragment = new ContactListFragment();
                 transaction.add(R.id.fragment_container_portrait, mContactListFragment, TAG_LIST_FRAGMENT);
-                transaction.commit();
                 //now the ListFragment is assigned, we should check if we need to show ContactFragment
                 //on top of ListFragment
                 //we'll do that in onRestoreInstantState
 
-                //we assign this, but it may be reassigned in onRestoreIntance
-                mCurrentFragmentTypeShowing = FragmentTypeShowing.CONTACT_LIST_FRAGMENT;
-
                 break;
             case Configuration.ORIENTATION_LANDSCAPE:
-
-                transaction.add(R.id.fragment_list_container_landscape, mContactListFragment, TAG_LIST_FRAGMENT);
-                //ListFragment exist now
-                //We should just start ContactFragment
-                //MAYBE we could pass some parameters so we show FIRST contact when app first time started
-
-                transaction.add(R.id.fragment_contact_container_landscape, mContactFragment, TAG_CONTACT_FRAGMENT);
-
-                transaction.commit();
-
                 mCurrentFragmentTypeShowing = FragmentTypeShowing.BOTH;
+                //fragment are inflated from XML
+                mContactFragment = (ContactFragment) fm.findFragmentById(R.id.fragment_contact_container_landscape);
+                mContactListFragment = (ContactListFragment) fm.findFragmentById(R.id.fragment_list_container_landscape);
                 break;
         }
+
+        transaction.commit();
 
     }
 
@@ -101,24 +91,18 @@ public class ContactListActivity extends Activity implements ContactListFragment
         FragmentTypeShowing previuousFragmentTypeShowing = FragmentTypeShowing.values()[i];
 
         if (getOrientation() == Configuration.ORIENTATION_PORTRAIT) {
-            if (previuousFragmentTypeShowing == FragmentTypeShowing.CONTACT_FRAGMENT
+            if (previuousFragmentTypeShowing == FragmentTypeShowing.CONTACT
                     || previuousFragmentTypeShowing == FragmentTypeShowing.BOTH) {
                 //if current state is PORTRAIT and previous FragmentType showing was CONTACT_FRAGMENT
                 // or BOTH
                 //we need to replace current fragment(ListFragment)
                 //and change mCurrentFragmentTypeShowing to CONTACT_FRAGMENT
 
-                Bundle args = new Bundle();
-                args.putString(ContactFragment.ARG_CONTACT_ID, mCurrentShowingContactId);
-                args.putInt(ContactFragment.ARG_CONTACT_POSITION, mCurrentShowingContactPositionInList);
-                mContactFragment.setArguments(args);
-
-                getFragmentManager().beginTransaction().replace(R.id.fragment_container_portrait, mContactFragment, TAG_CONTACT_FRAGMENT).addToBackStack(null).commit();
-
-                mCurrentFragmentTypeShowing = FragmentTypeShowing.CONTACT_FRAGMENT;
+                onContactSelected(mCurrentShowingContactPositionInList, mCurrentShowingContactId);
+                mCurrentFragmentTypeShowing = FragmentTypeShowing.CONTACT;
             }
         }
-        if (getOrientation() == Configuration.ORIENTATION_LANDSCAPE && previuousFragmentTypeShowing == FragmentTypeShowing.CONTACT_FRAGMENT) {
+        if (getOrientation() == Configuration.ORIENTATION_LANDSCAPE && previuousFragmentTypeShowing == FragmentTypeShowing.CONTACT) {
             //if we are now in landscape and previous fragment was ContactFragment
             //we need to select some contact in list and `tell` ContactFragment to show that contact
             //mCurrentFragmentTypeShowing is already set
