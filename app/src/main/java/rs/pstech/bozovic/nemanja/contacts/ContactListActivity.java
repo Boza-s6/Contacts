@@ -52,6 +52,7 @@ public class ContactListActivity extends Activity implements ContactListFragment
 
                 mContactListFragment = new ContactListFragment();
                 transaction.add(R.id.fragment_container_portrait, mContactListFragment, TAG_LIST_FRAGMENT);
+
                 //now the ListFragment is assigned, we should check if we need to show ContactFragment
                 //on top of ListFragment
                 //we'll do that in onRestoreInstantState
