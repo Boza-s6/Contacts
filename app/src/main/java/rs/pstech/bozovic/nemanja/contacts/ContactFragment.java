@@ -18,6 +18,7 @@ public class ContactFragment extends Fragment {
     static final String ARG_CONTACT_POSITION = "position";
 
     private static final String EXTRA_CONTACT_ID = "contact id";
+    static final String TAG_CONTACT_FRAGMENT = "contact fragment";
 //    private static final String EXTRA_CONTACT_POS = "pos id";
 
     String mContactId = null;

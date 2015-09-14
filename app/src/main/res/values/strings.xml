@@ -9,4 +9,5 @@
     <string name="title_activity_contact_fragment">ContactFragmentActivity</string>
     <string name="title_activity_contact">ContactActivity</string>
     <string name="title_activity_contact_list">ContactListActivity</string>
+    <string name="title_activity_blab">BLABA</string>
 </resources>

@@ -26,6 +26,8 @@ import java.util.List;
 public class ContactListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
 
+    static final String TAG_LIST_FRAGMENT = "list fragment";
+
     public interface OnContactSelectedListener {
 
         void onContactSelected(int position, String contact_id);
@@ -33,9 +35,9 @@ public class ContactListFragment extends ListFragment implements LoaderManager.L
 
     private static final String CLASS_NAME = ContactListFragment.class.getSimpleName();
 
-    private static final int CONTACT_LOADER = 0;
+    private static final int CONTACT_LOADER_ID = 0;
 
-    private ContactListActivity mListener; //Activity, callback, for communication with other fragment
+    private OnContactSelectedListener mListener; //Activity, callback, for communication with other fragment
     private SimpleContactsArrayAdapter mAdapter; //Adapter for my list
 
     private List<SimpleContact> mContactList = new ArrayList<>(); //contact list
@@ -51,7 +53,7 @@ public class ContactListFragment extends ListFragment implements LoaderManager.L
         Log.d(CLASS_NAME, "onAttach");
         try {
             //we need this reference so we can communicate with other fragments
-            mListener = (ContactListActivity) activity;
+            mListener = (OnContactSelectedListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -73,10 +75,10 @@ public class ContactListFragment extends ListFragment implements LoaderManager.L
         //because of this, this fragment will be called only once, while Activity is alive
 //        setRetainInstance(true);
 
-        mAdapter = new SimpleContactsArrayAdapter(mListener, android.R.layout.simple_list_item_activated_1, mContactList);
+        mAdapter = new SimpleContactsArrayAdapter(getActivity(), android.R.layout.simple_list_item_activated_1, mContactList);
         setListAdapter(mAdapter);
 
-        getLoaderManager().initLoader(CONTACT_LOADER, null, this);
+        getLoaderManager().initLoader(CONTACT_LOADER_ID, null, this);
     }
 
     @Override
@@ -147,7 +149,7 @@ public class ContactListFragment extends ListFragment implements LoaderManager.L
 
         Log.d(CLASS_NAME, "onCreateLoader");
 
-        if(loaderID != CONTACT_LOADER)
+        if(loaderID != CONTACT_LOADER_ID)
             return null;
 
         //which table to query
@@ -168,6 +170,9 @@ public class ContactListFragment extends ListFragment implements LoaderManager.L
 
         Log.d(CLASS_NAME, "onLoadFinished");
 
+        if(loader.getId() != CONTACT_LOADER_ID)
+            return;
+
         if (data == null || data.getCount() <= 0)
             return;
 
@@ -178,10 +183,10 @@ public class ContactListFragment extends ListFragment implements LoaderManager.L
 
         data.moveToFirst();
         while (data.moveToNext()){
-            String contacId = data.getString(ID);
+            String contactId = data.getString(ID);
             String name = data.getString(DISPLAY_NAME);
 
-            mContactList.add(new SimpleContact(contacId, name));
+            mContactList.add(new SimpleContact(contactId, name));
         }
         mAdapter.notifyDataSetChanged();
 
@@ -194,6 +199,14 @@ public class ContactListFragment extends ListFragment implements LoaderManager.L
 
     }
 
+//    public void setListener(OnContactSelectedListener listener){
+//        try {
+//            mListener = listener;
+//        }catch (ClassCastException e){
+//            e.printStackTrace();
+//            System.exit(1);
+//        }
+//    }
 
     private class SimpleContactsArrayAdapter extends ArrayAdapter<SimpleContact> {
 
